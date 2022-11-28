@@ -10,6 +10,12 @@
 		},
         {
             "include": "#brackets"
+        },
+        {
+            "include": "#block_comment"
+        },
+        {
+            "include": "#line_comment"
         }
 	],
 	"repository": {
@@ -40,7 +46,24 @@
 					"match": "\\\\."
 				}
             ]
-        }
+        },
+        "block_comment": {
+            "name": "comment.block",
+            "begin": "###",
+            "end": "###",
+            "patterns": [
+                {
+					"name": "constant.character.escape.proze",
+					"match": "\\\\."
+				}
+            ]
+        },
+        "line_comment": {
+			"patterns": [{
+				"name": "comment.line",
+				"match": "##.*$"
+			}]
+		}
 	},
 	"scopeName": "source.proze"
 }
