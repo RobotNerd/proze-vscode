@@ -7,10 +7,11 @@
     "vscode": "^1.73.0"
   },
   "categories": [
-    "Other"
+    "Programming Languages"
   ],
   "activationEvents": [
-    "onCommand:proze.compile"
+    "onCommand:proze.compile",
+    "onLanguage:proze"
   ],
   "main": "./out/extension.js",
   "contributes": {
@@ -19,7 +20,22 @@
         "command": "proze.compile",
         "title": "Proze: Compile"
       }
-    ]
+    ],
+    "languages": [{
+      "id": "proze",
+      "extensions": ["proze"],
+      "aliases": ["Proze", "proze"],
+      "configuration": "./language-configuration.json"
+    }],
+    "grammars": [{
+      "language": "proze",
+      "scopeName": "source.proze",
+      "path": "./syntaxes/proze.tmLanguage.json"
+    }],
+    "snippets": [{
+        "language": "proze",
+        "path": "./snippets/proze.json"
+    }]
   },
   "scripts": {
     "vscode:prepublish": "npm run compile",

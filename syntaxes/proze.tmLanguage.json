@@ -1,0 +1,32 @@
+{
+	"$schema": "https://raw.githubusercontent.com/martinring/tmlanguage/master/tmlanguage.json",
+	"name": "proze",
+	"patterns": [
+		{
+			"include": "#keywords"
+		},
+		{
+			"include": "#strings"
+		}
+	],
+	"repository": {
+		"keywords": {
+			"patterns": [{
+				"name": "keyword.control.proze",
+				"match": "^(Title|Author|Chapter|Section):\\s"
+			}]
+		},
+		"strings": {
+			"name": "string.quoted.double.proze",
+			"begin": "\"",
+			"end": "\"",
+			"patterns": [
+				{
+					"name": "constant.character.escape.proze",
+					"match": "\\\\."
+				}
+			]
+		}
+	},
+	"scopeName": "source.proze"
+}
