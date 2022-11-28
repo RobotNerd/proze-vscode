@@ -16,6 +16,12 @@
         },
         {
             "include": "#line_comment"
+        },
+        {
+            "include": "#bold"
+        },
+        {
+            "include": "#italic"
         }
 	],
 	"repository": {
@@ -69,7 +75,29 @@
 				"name": "comment.line",
 				"match": "##.*$"
 			}]
-		}
+		},
+        "bold": {
+            "name": "markup.bold",
+			"begin": "__",
+			"end": "__",
+			"patterns": [
+				{
+					"name": "constant.character.escape.proze",
+					"match": "\\\\."
+				}
+			]
+        },
+        "italic": {
+            "name": "markup.italic",
+			"begin": "\\*",
+			"end": "\\*",
+			"patterns": [
+				{
+					"name": "constant.character.escape.proze",
+					"match": "\\\\."
+				}
+			]
+        }
 	},
 	"scopeName": "source.proze"
 }
