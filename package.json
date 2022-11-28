@@ -10,14 +10,14 @@
     "Other"
   ],
   "activationEvents": [
-    "onCommand:proze.helloWorld"
+    "onCommand:proze.compile"
   ],
   "main": "./out/extension.js",
   "contributes": {
     "commands": [
       {
-        "command": "proze.helloWorld",
-        "title": "Hello World"
+        "command": "proze.compile",
+        "title": "Proze: Compile"
       }
     ]
   },
