@@ -7,7 +7,10 @@
 		},
 		{
 			"include": "#strings"
-		}
+		},
+        {
+            "include": "#brackets"
+        }
 	],
 	"repository": {
 		"keywords": {
@@ -26,7 +29,18 @@
 					"match": "\\\\."
 				}
 			]
-		}
+		},
+        "brackets": {
+            "name": "meta.preprocessor.string",
+            "begin": "\\[",
+            "end": "\\]",
+            "patterns": [
+                {
+					"name": "constant.character.escape.proze",
+					"match": "\\\\."
+				}
+            ]
+        }
 	},
 	"scopeName": "source.proze"
 }

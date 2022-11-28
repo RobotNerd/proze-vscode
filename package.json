@@ -31,10 +31,6 @@
       "language": "proze",
       "scopeName": "source.proze",
       "path": "./syntaxes/proze.tmLanguage.json"
-    }],
-    "snippets": [{
-        "language": "proze",
-        "path": "./snippets/proze.json"
     }]
   },
   "scripts": {
