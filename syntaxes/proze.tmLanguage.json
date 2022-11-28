@@ -3,7 +3,7 @@
 	"name": "proze",
 	"patterns": [
 		{
-			"include": "#keywords"
+			"include": "#metadata"
 		},
 		{
 			"include": "#strings"
@@ -19,11 +19,17 @@
         }
 	],
 	"repository": {
-		"keywords": {
-			"patterns": [{
-				"name": "keyword.control.proze",
-				"match": "^(Title|Author|Chapter|Section):\\s"
-			}]
+		"metadata": {
+			"patterns": [
+                {
+                    "name": "keyword.control.proze",
+                    "match": "^(Title|Author|Chapter|Section):\\s"
+                },
+                {
+                    "name": "keyword.control.proze",
+                    "match": "^---\\s?$"
+                }
+            ]
 		},
 		"strings": {
 			"name": "string.quoted.double.proze",
