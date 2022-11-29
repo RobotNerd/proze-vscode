@@ -2,52 +2,29 @@
 	"$schema": "https://raw.githubusercontent.com/martinring/tmlanguage/master/tmlanguage.json",
 	"name": "proze",
 	"patterns": [
-		{
-			"include": "#metadata"
-		},
-		{
-			"include": "#dialogue"
-		},
-        {
-            "include": "#brackets"
-        },
         {
             "include": "#block_comment"
         },
-        {
-            "include": "#line_comment"
+		{
+            "include": "#brackets"
         },
         {
             "include": "#bold"
         },
         {
+			"include": "#dialogue"
+		},
+        {
             "include": "#italic"
-        }
+        },
+        {
+            "include": "#line_comment"
+        },
+        {
+			"include": "#metadata"
+		}
 	],
 	"repository": {
-		"metadata": {
-			"patterns": [
-                {
-                    "name": "keyword.control.proze",
-                    "match": "^(Title|Author|Chapter|Section):\\s"
-                },
-                {
-                    "name": "keyword.control.proze",
-                    "match": "^---\\s?$"
-                }
-            ]
-		},
-		"dialogue": {
-			"name": "string.quoted.double.proze",
-			"begin": "\"",
-			"end": "\"",
-			"patterns": [
-				{
-					"name": "constant.character.escape.proze",
-					"match": "\\\\."
-				}
-			]
-		},
         "brackets": {
             "name": "meta.preprocessor.string",
             "begin": "\\[",
@@ -76,31 +53,10 @@
                 }
             ]
         },
-        "line_comment": {
-            "name": "comment.line",
-            "begin": "##",
-            "end": "\n",
-            "patterns": [
-                {
-                    "include": "#comment_token"
-                }
-            ]
-        },
         "bold": {
             "name": "markup.bold",
 			"begin": "__",
 			"end": "__",
-			"patterns": [
-				{
-					"name": "constant.character.escape.proze",
-					"match": "\\\\."
-				}
-			]
-        },
-        "italic": {
-            "name": "markup.italic",
-			"begin": "\\*",
-			"end": "\\*",
 			"patterns": [
 				{
 					"name": "constant.character.escape.proze",
@@ -115,7 +71,51 @@
                     "match": "\\b(FIXME|IMPORTANT|NOTE|TODO)\\b"
                 }
             ]
-        }
+        },
+		"dialogue": {
+			"name": "string.quoted.double.proze",
+			"begin": "\"",
+			"end": "\"",
+			"patterns": [
+				{
+					"name": "constant.character.escape.proze",
+					"match": "\\\\."
+				}
+			]
+		},
+        "italic": {
+            "name": "markup.italic",
+			"begin": "\\*",
+			"end": "\\*",
+			"patterns": [
+				{
+					"name": "constant.character.escape.proze",
+					"match": "\\\\."
+				}
+			]
+        },
+        "line_comment": {
+            "name": "comment.line",
+            "begin": "##",
+            "end": "\n",
+            "patterns": [
+                {
+                    "include": "#comment_token"
+                }
+            ]
+        },
+		"metadata": {
+			"patterns": [
+                {
+                    "name": "keyword.control.proze",
+                    "match": "^(Title|Author|Chapter|Section):\\s"
+                },
+                {
+                    "name": "keyword.control.proze",
+                    "match": "^---\\s?$"
+                }
+            ]
+		}
 	},
 	"scopeName": "source.proze"
 }
