@@ -56,7 +56,10 @@
                 {
 					"name": "constant.character.escape.proze",
 					"match": "\\\\."
-				}
+				},
+                {
+                    "include": "#comment_token"
+                }
             ]
         },
         "block_comment": {
@@ -67,15 +70,22 @@
                 {
 					"name": "constant.character.escape.proze",
 					"match": "\\\\."
-				}
+				},
+                {
+                    "include": "#comment_token"
+                }
             ]
         },
         "line_comment": {
-			"patterns": [{
-				"name": "comment.line",
-				"match": "##.*$"
-			}]
-		},
+            "name": "comment.line",
+            "begin": "##",
+            "end": "\n",
+            "patterns": [
+                {
+                    "include": "#comment_token"
+                }
+            ]
+        },
         "bold": {
             "name": "markup.bold",
 			"begin": "__",
@@ -97,6 +107,14 @@
 					"match": "\\\\."
 				}
 			]
+        },
+        "comment_token": {
+            "patterns": [
+                {
+                    "name": "keyword",
+                    "match": "\\b(FIXME|IMPORTANT|NOTE|TODO)\\b"
+                }
+            ]
         }
 	},
 	"scopeName": "source.proze"
