@@ -6,7 +6,7 @@
 			"include": "#metadata"
 		},
 		{
-			"include": "#strings"
+			"include": "#dialogue"
 		},
         {
             "include": "#brackets"
@@ -37,7 +37,7 @@
                 }
             ]
 		},
-		"strings": {
+		"dialogue": {
 			"name": "string.quoted.double.proze",
 			"begin": "\"",
 			"end": "\"",
