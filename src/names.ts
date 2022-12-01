@@ -62,7 +62,6 @@ export class NameHighlighter {
 
 export class NameErrors {
 	private names: Name[] = stubNames;
-	private diagnostics: vscode.Diagnostic[] = [];
 	private diagnosticCollection: vscode.DiagnosticCollection;
 
 	constructor() {
@@ -84,6 +83,7 @@ export class NameErrors {
 	}
 
 	parseDocuments(doc: vscode.TextDocument): vscode.Diagnostic[] {
+		let diagnostics: vscode.Diagnostic[] = [];
 		this.diagnosticCollection.clear();
 
 		for (let i = 0; i < doc.lineCount; i++) {
@@ -92,6 +92,7 @@ export class NameErrors {
 				let index = line.text.indexOf(name.name);
 				if (index >= 0 && name.type === NameType.invalid) {
 					this.addDiagnostic(
+						diagnostics,
 						`Invalid character name found: ${name.name}`,
 						i, index,
 						i, index + name.name.length
@@ -100,19 +101,20 @@ export class NameErrors {
 			}
 		}
 
-		this.diagnosticCollection.set(doc.uri, this.diagnostics);
+		this.diagnosticCollection.set(doc.uri, diagnostics);
 
-		return this.diagnostics;
+		return diagnostics;
 	}
 
 	private addDiagnostic(
+		diagnostics: vscode.Diagnostic[],
 		msg: string,
 		line1: number,
 		column1: number,
 		line2: number,
 		column2: number
 	) {
-		this.diagnostics.push(new vscode.Diagnostic(
+		diagnostics.push(new vscode.Diagnostic(
 			new vscode.Range(line1, column1, line2, column2),
 			msg,
 			vscode.DiagnosticSeverity.Error
