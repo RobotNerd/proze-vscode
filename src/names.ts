@@ -15,9 +15,11 @@ interface Name {
 export class NameHighlighter {
 
 	tokenTypes: string[] = ['keyword', 'variable', 'regexp', 'decorator'];
-	tokenModifiers: string[] = ['deprecated'];
-
+	tokenModifiers: string[] = [];
 	legend: vscode.SemanticTokensLegend;
+	private _tokenProvider: TokenProvider;
+
+	diagnosticCollection: vscode.DiagnosticCollection;
 
 	// TODO build a trie from the names for quick lookup when parsing text
 	names: Name[] = [
@@ -33,9 +35,30 @@ export class NameHighlighter {
 
 	constructor() {
 		this.legend = new vscode.SemanticTokensLegend(this.tokenTypes, this.tokenModifiers);
+		this.diagnosticCollection = vscode.languages.createDiagnosticCollection('proze');
+		this._tokenProvider = this.tokenProvider() as TokenProvider;
 	}
 
 	activate(context: vscode.ExtensionContext) {
+		this.activateSyntaxHighlighter(context);
+		this.activateErrorDiagnostics(context);
+	}
+
+	private activateErrorDiagnostics(context: vscode.ExtensionContext) {
+		if (vscode.window.activeTextEditor) {
+			this.diagnosticCollection.set(vscode.window.activeTextEditor.document.uri, this.diagnostics());
+		}
+	
+		context.subscriptions.push(
+			vscode.workspace.onDidChangeTextDocument((editor) => {
+				if (editor) {
+					this.diagnosticCollection.set(editor.document.uri, this.diagnostics());
+				}
+			})
+		);
+	}
+
+	private activateSyntaxHighlighter(context: vscode.ExtensionContext) {
 		context.subscriptions.push(
 			vscode.languages.registerDocumentSemanticTokensProvider(
 				{ language: 'proze' },
@@ -45,7 +68,14 @@ export class NameHighlighter {
 		);
 	}
 
+	diagnostics(): vscode.Diagnostic[] {
+		return this._tokenProvider.diagnostics;
+	}
+
 	private tokenProvider(): vscode.DocumentSemanticTokensProvider {
+		if (this._tokenProvider) {
+			return this._tokenProvider;
+		}
 		return new TokenProvider(this.legend, this.names);
 	}
 }
@@ -57,6 +87,8 @@ interface ParsedToken {
 }
 
 class TokenProvider implements vscode.DocumentSemanticTokensProvider {
+
+	diagnostics: vscode.Diagnostic[] = [];
 
 	constructor(
 		private legend: vscode.SemanticTokensLegend,
@@ -89,7 +121,6 @@ class TokenProvider implements vscode.DocumentSemanticTokensProvider {
 				let index = lines[i].indexOf(name.name);
 				if (index >= 0) {
 					let tokenType: string = '';
-					let tokenModifier: string[] = [];
 					switch(name.type){
 						case NameType.character:
 							tokenType = 'keyword';
@@ -102,7 +133,11 @@ class TokenProvider implements vscode.DocumentSemanticTokensProvider {
 							break;
 						case NameType.invalid:
 							tokenType = 'decorator';
-							tokenModifier = ['deprecated'];
+							this.addDiagnostic(
+								`Invalid character name found: ${name.name}`,
+								i, index,
+								i, index + name.name.length
+							);
 							break;
 					}
 					tokens.push({
@@ -111,11 +146,25 @@ class TokenProvider implements vscode.DocumentSemanticTokensProvider {
 							new vscode.Position(i, index + name.name.length)
 						),
 						tokenType: tokenType,
-						tokenModifier: tokenModifier,
+						tokenModifier: [],
 					});
 				}
 			}
 		}
 		return tokens;
+	}
+
+	private addDiagnostic(
+		msg: string,
+		line1: number,
+		column1: number,
+		line2: number,
+		column2: number
+	) {
+		this.diagnostics.push(new vscode.Diagnostic(
+			new vscode.Range(line1, column1, line2, column2),
+			msg,
+			vscode.DiagnosticSeverity.Error
+		));
 	}
 }
