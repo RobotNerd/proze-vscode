@@ -1,5 +1,5 @@
 import * as vscode from 'vscode';
-import { NameHighlighter } from './names';
+import { NameHighlighter, NameErrors } from './names';
 
 export function activate(context: vscode.ExtensionContext) {
 	let disposable = vscode.commands.registerCommand('proze.compile', () => {
@@ -10,6 +10,9 @@ export function activate(context: vscode.ExtensionContext) {
 
 	const names = new NameHighlighter();
 	names.activate(context);
+
+	const nameErrors = new NameErrors();
+	nameErrors.activate(context);
 }
 
 export function deactivate() {}
