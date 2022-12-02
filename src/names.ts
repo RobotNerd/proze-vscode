@@ -60,29 +60,56 @@ export class NameHighlighter {
 	}
 }
 
+interface UriDiagnostics {
+	uri: vscode.Uri;
+	diagnostics: vscode.Diagnostic[];
+}
+
 export class NameErrors {
 	private names: Name[] = stubNames;
 	private diagnosticCollection: vscode.DiagnosticCollection;
+
+	private diagnosticMap: Map<string, UriDiagnostics> = new Map<string, UriDiagnostics>;
 
 	constructor() {
 		this.diagnosticCollection = vscode.languages.createDiagnosticCollection('proze');
 	}
 
+	// TODO create config file watcher for each workspace that has a config file
+	//		- watch for changes to existing config files
+	// 		- watch for the creation of a config file
+	//		- parse all proze documents if any name changes occurred
+	// let watcher = vscode.workspace.createFileSystemWatcher(path_to_config);
+	// watcher.onDidChange(e => {
+	// 	// See example: https://typescript.hotexamples.com/examples/vscode/FileSystemWatcher/-/typescript-filesystemwatcher-class-examples.html
+	// });
+
 	activate(context: vscode.ExtensionContext) {
+
+		for (let doc of vscode.workspace.textDocuments) {
+			this.parseDocument(doc);
+		}
+		
 		if (vscode.window.activeTextEditor) {
-			this.parseDocuments(vscode.window.activeTextEditor.document);
+			this.parseDocument(vscode.window.activeTextEditor.document);
 		}
 	
 		context.subscriptions.push(
 			vscode.workspace.onDidChangeTextDocument((editor) => {
 				if (editor) {
-					this.parseDocuments(editor.document);
+					this.parseDocument(editor.document);
 				}
+			})
+		);
+
+		context.subscriptions.push(
+			vscode.workspace.onDidOpenTextDocument((doc) => {
+				this.parseDocument(doc);
 			})
 		);
 	}
 
-	parseDocuments(doc: vscode.TextDocument): vscode.Diagnostic[] {
+	private parseDocument(doc: vscode.TextDocument) {
 		let diagnostics: vscode.Diagnostic[] = [];
 		this.diagnosticCollection.clear();
 
@@ -101,9 +128,19 @@ export class NameErrors {
 			}
 		}
 
-		this.diagnosticCollection.set(doc.uri, diagnostics);
+		// Set/overwrite existing diagnostics for the file.
+		this.diagnosticMap.set(
+			doc.uri.toString(),
+			{
+				uri: doc.uri,
+				diagnostics: diagnostics
+			}
+		);
 
-		return diagnostics;
+		// Reapply diagnostics for all files.
+		for (let diag of this.diagnosticMap.values()) {
+			this.diagnosticCollection.set(diag.uri, diag.diagnostics);
+		}
 	}
 
 	private addDiagnostic(
