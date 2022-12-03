@@ -18,6 +18,11 @@ interface ParsedToken {
 	tokenModifier: string[];
 }
 
+interface UriDiagnostics {
+	uri: vscode.Uri;
+	diagnostics: vscode.Diagnostic[];
+}
+
 const stubNames: Name[] = [
 	{name: 'Jessica', type: NameType.character},
 	{name: 'Fred', type: NameType.character},
@@ -60,11 +65,6 @@ export class NameHighlighter {
 	}
 }
 
-interface UriDiagnostics {
-	uri: vscode.Uri;
-	diagnostics: vscode.Diagnostic[];
-}
-
 export class NameErrors {
 	private names: Name[] = stubNames;
 	private diagnosticCollection: vscode.DiagnosticCollection;
@@ -85,34 +85,44 @@ export class NameErrors {
 	// });
 
 	activate(context: vscode.ExtensionContext) {
-
 		for (let doc of vscode.workspace.textDocuments) {
-			this.parseDocument(doc);
+			this.updateDiagnostics(doc);
 		}
-		
 		if (vscode.window.activeTextEditor) {
-			this.parseDocument(vscode.window.activeTextEditor.document);
+			this.updateDiagnostics(vscode.window.activeTextEditor.document);
 		}
-	
 		context.subscriptions.push(
 			vscode.workspace.onDidChangeTextDocument((editor) => {
 				if (editor) {
-					this.parseDocument(editor.document);
+					this.updateDiagnostics(editor.document);
 				}
 			})
 		);
-
 		context.subscriptions.push(
 			vscode.workspace.onDidOpenTextDocument((doc) => {
-				this.parseDocument(doc);
+				this.updateDiagnostics(doc);
 			})
 		);
 	}
 
-	private parseDocument(doc: vscode.TextDocument) {
-		let diagnostics: vscode.Diagnostic[] = [];
+	private updateDiagnostics(doc: vscode.TextDocument) {
 		this.diagnosticCollection.clear();
+		let diagnostics: vscode.Diagnostic[] = this.parseDocument(doc);
+		this.diagnosticMap.set(
+			doc.uri.toString(),
+			{uri: doc.uri, diagnostics: diagnostics}
+		);
+		this.applyDiagnostics();
+	}
 
+	private applyDiagnostics() {
+		for (let diag of this.diagnosticMap.values()) {
+			this.diagnosticCollection.set(diag.uri, diag.diagnostics);
+		}
+	}
+
+	private parseDocument(doc: vscode.TextDocument): vscode.Diagnostic[] {
+		let diagnostics: vscode.Diagnostic[] = [];
 		for (let i = 0; i < doc.lineCount; i++) {
 			const line = doc.lineAt(i);
 			for (let name of this.names) {
@@ -127,20 +137,7 @@ export class NameErrors {
 				}
 			}
 		}
-
-		// Set/overwrite existing diagnostics for the file.
-		this.diagnosticMap.set(
-			doc.uri.toString(),
-			{
-				uri: doc.uri,
-				diagnostics: diagnostics
-			}
-		);
-
-		// Reapply diagnostics for all files.
-		for (let diag of this.diagnosticMap.values()) {
-			this.diagnosticCollection.set(diag.uri, diag.diagnostics);
-		}
+		return diagnostics;
 	}
 
 	private addDiagnostic(
