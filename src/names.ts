@@ -82,13 +82,15 @@ export class NameErrors {
 	}
 
 	private updateDiagnostics(doc: vscode.TextDocument) {
-		this.diagnosticCollection.clear();
-		let diagnostics: vscode.Diagnostic[] = this.parseDocument(doc);
-		this.diagnosticMap.set(
-			doc.uri.toString(),
-			{uri: doc.uri, diagnostics: diagnostics}
-		);
-		this.applyDiagnostics();
+		if (doc.languageId === 'proze') {
+			this.diagnosticCollection.clear();
+			let diagnostics: vscode.Diagnostic[] = this.parseDocument(doc);
+			this.diagnosticMap.set(
+				doc.uri.toString(),
+				{uri: doc.uri, diagnostics: diagnostics}
+			);
+			this.applyDiagnostics();
+		}
 	}
 
 	private applyDiagnostics() {
