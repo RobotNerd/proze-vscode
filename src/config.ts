@@ -81,27 +81,24 @@ export class Config {
         return '';
     }
 
-    load() {
-        vscode.workspace.findFiles('**/config.*')
-            .then((files: vscode.Uri[]) => {
-                for (const file of files) {
-                    let ext = Path.parse(file.path).ext;
-                    vscode.workspace.fs.readFile(file).then((raw: Uint8Array) => {
-                        let content = raw.toString();
-                        const key = this.projectKey(file);
-                        switch(ext) {
-                            case '.json':
-                                this.configurations.set(key, this.parseJSON(content));
-                                break;
-                            case '.yaml':
-                            case '.yml':
-                                this.configurations.set(key, this.parseYAML(content));
-                                break;
-                        }
-                        this.updateNameList();
-                    });
+    async load() {
+        const files: vscode.Uri[] = await vscode.workspace.findFiles('**/config.*');
+        for (const file of files) {
+            let ext = Path.parse(file.path).ext;
+            const raw: Uint8Array = await vscode.workspace.fs.readFile(file);
+            let content = raw.toString();
+                const key = this.projectKey(file);
+                switch(ext) {
+                    case '.json':
+                        this.configurations.set(key, this.parseJSON(content));
+                        break;
+                    case '.yaml':
+                    case '.yml':
+                        this.configurations.set(key, this.parseYAML(content));
+                        break;
                 }
-            });
+        }
+        this.updateNameList();
     }
 
     get(uri: vscode.Uri): ConfigInterface | undefined {

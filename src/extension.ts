@@ -2,10 +2,12 @@ import { Config } from './config';
 import { NameHighlighter, NameErrors } from './names';
 import * as vscode from 'vscode';
 
-export function activate(context: vscode.ExtensionContext) {
+export async function activate(context: vscode.ExtensionContext) {
 	let disposable = vscode.commands.registerCommand('proze.compile', () => {
 		vscode.window.showErrorMessage('Compile command not implemented');
 	});
+
+	await Config.getInstance().load();
 
 	context.subscriptions.push(disposable);
 
@@ -14,8 +16,6 @@ export function activate(context: vscode.ExtensionContext) {
 
 	const nameErrors = new NameErrors();
 	nameErrors.activate(context);
-
-	Config.getInstance().load();
 }
 
 export function deactivate() {}
