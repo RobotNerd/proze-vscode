@@ -4,6 +4,18 @@ import * as vscode from 'vscode';
 
 // TODO merge this (or find abstraction) with the config parsing in the compiler module
 
+export enum NameType {
+	character = 'character',
+	place = 'place',
+	thing = 'thing',
+	invalid = 'invalid',
+}
+
+export interface Name {
+	name: string,
+	type: NameType,
+}
+
 export interface ConfigNames {
     character?: string[];
     place?: string[];
@@ -13,6 +25,7 @@ export interface ConfigNames {
 
 export interface ConfigInterface {
     names?: ConfigNames;
+    nameList?: Name[];
 }
 
 export class Config {
@@ -27,6 +40,32 @@ export class Config {
             Config.instance = new Config();
         }
         return Config.instance;
+    }
+
+    private updateNameList() {
+        for (const config of this.configurations.values()) {
+            config.nameList = [];
+            if (config.names?.character) {
+                for (let name of config.names?.character) {
+                    config.nameList.push({ name: name, type: NameType.character });
+                }
+            }
+            if (config.names?.place) {
+                for (let name of config.names?.place) {
+                    config.nameList.push({ name: name, type: NameType.place });
+                }
+            }
+            if (config.names?.thing) {
+                for (let name of config.names?.thing) {
+                    config.nameList.push({ name: name, type: NameType.thing });
+                }
+            }
+            if (config.names?.invalid) {
+                for (let name of config.names?.invalid) {
+                    config.nameList.push({ name: name, type: NameType.invalid });
+                }
+            }
+        }
     }
 
     private projectKey(uri: vscode.Uri): string {
@@ -59,6 +98,7 @@ export class Config {
                                 this.configurations.set(key, this.parseYAML(content));
                                 break;
                         }
+                        this.updateNameList();
                     });
                 }
             });
@@ -67,6 +107,14 @@ export class Config {
     get(uri: vscode.Uri): ConfigInterface | undefined {
         const key = this.projectKey(uri);
         return this.configurations.get(key);
+    }
+
+    names(uri: vscode.Uri): Name[] {
+        const config = this.get(uri);
+        if (config?.nameList) {
+            return config.nameList;
+        }
+        return [];
     }
 
     private parseJSON(content: string): ConfigInterface {

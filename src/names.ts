@@ -1,16 +1,5 @@
 import * as vscode from 'vscode';
-
-enum NameType {
-	character = 'character',
-	place = 'place',
-	thing = 'thing',
-	invalid = 'invalid',
-}
-
-interface Name {
-	name: string,
-	type: NameType,
-}
+import { Config, Name, NameType } from './config';
 
 interface ParsedToken {
 	range: vscode.Range;
@@ -23,20 +12,8 @@ interface UriDiagnostics {
 	diagnostics: vscode.Diagnostic[];
 }
 
-const stubNames: Name[] = [
-	{name: 'Jessica', type: NameType.character},
-	{name: 'Fred', type: NameType.character},
-	{name: 'ice cream shop', type: NameType.place},
-	{name: 'solarium', type: NameType.place},
-	{name: 'nightlance', type: NameType.thing},
-	{name: 'razor brush', type: NameType.thing},
-	{name: 'Gary', type: NameType.invalid},
-	{name: 'purpletrain', type: NameType.invalid},
-];
-
 export class NameHighlighter {
 
-	private names: Name[] = stubNames;
 	private tokenTypes: string[] = ['keyword', 'variable', 'regexp', 'decorator'];
 	private tokenModifiers: string[] = [];
 	private legend: vscode.SemanticTokensLegend;
@@ -61,12 +38,11 @@ export class NameHighlighter {
 		if (this._validNameTokens) {
 			return this._validNameTokens;
 		}
-		return new ValidNameTokens(this.legend, this.names);
+		return new ValidNameTokens(this.legend);
 	}
 }
 
 export class NameErrors {
-	private names: Name[] = stubNames;
 	private diagnosticCollection: vscode.DiagnosticCollection;
 
 	private diagnosticMap: Map<string, UriDiagnostics> = new Map<string, UriDiagnostics>;
@@ -123,9 +99,10 @@ export class NameErrors {
 
 	private parseDocument(doc: vscode.TextDocument): vscode.Diagnostic[] {
 		let diagnostics: vscode.Diagnostic[] = [];
+		const names = Config.getInstance().names(doc.uri);
 		for (let i = 0; i < doc.lineCount; i++) {
 			const line = doc.lineAt(i);
-			for (let name of this.names) {
+			for (let name of names) {
 				let index = line.text.indexOf(name.name);
 				if (index >= 0 && name.type === NameType.invalid) {
 					this.addDiagnostic(
@@ -159,15 +136,15 @@ export class NameErrors {
 class ValidNameTokens implements vscode.DocumentSemanticTokensProvider {
 
 	constructor(
-		private legend: vscode.SemanticTokensLegend,
-		private names: Name[]
+		private legend: vscode.SemanticTokensLegend
 	) {}
 
 	async provideDocumentSemanticTokens(
 		document: vscode.TextDocument,
 		_token: vscode.CancellationToken
 	): Promise<vscode.SemanticTokens> {
-		const tokens = this.parseText(document.getText(), this.names);
+		const names = Config.getInstance().names(document.uri);
+		const tokens = this.parseText(document.getText(), names);
 		const builder = new vscode.SemanticTokensBuilder(this.legend);
 		for(let token of tokens) {
 			try {
