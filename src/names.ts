@@ -44,11 +44,25 @@ export class NameHighlighter {
 
 export class NameErrors {
 	private diagnosticCollection: vscode.DiagnosticCollection;
-
 	private diagnosticMap: Map<string, UriDiagnostics> = new Map<string, UriDiagnostics>;
 
 	constructor() {
 		this.diagnosticCollection = vscode.languages.createDiagnosticCollection('proze');
+	}
+
+	private addDiagnostic(
+		diagnostics: vscode.Diagnostic[],
+		msg: string,
+		line1: number,
+		column1: number,
+		line2: number,
+		column2: number
+	) {
+		diagnostics.push(new vscode.Diagnostic(
+			new vscode.Range(line1, column1, line2, column2),
+			msg,
+			vscode.DiagnosticSeverity.Error
+		));
 	}
 
 	activate(context: vscode.ExtensionContext) {
@@ -68,24 +82,6 @@ export class NameErrors {
 				this.updateDiagnostics(doc);
 			})
 		);
-	}
-
-	updateAllDocs() {
-		for (let doc of vscode.workspace.textDocuments) {
-			this.updateDiagnostics(doc);
-		}
-	}
-
-	private updateDiagnostics(doc: vscode.TextDocument) {
-		if (doc.languageId === 'proze') {
-			this.diagnosticCollection.clear();
-			let diagnostics: vscode.Diagnostic[] = this.parseDocument(doc);
-			this.diagnosticMap.set(
-				doc.uri.toString(),
-				{uri: doc.uri, diagnostics: diagnostics}
-			);
-			this.applyDiagnostics();
-		}
 	}
 
 	private applyDiagnostics() {
@@ -114,19 +110,22 @@ export class NameErrors {
 		return diagnostics;
 	}
 
-	private addDiagnostic(
-		diagnostics: vscode.Diagnostic[],
-		msg: string,
-		line1: number,
-		column1: number,
-		line2: number,
-		column2: number
-	) {
-		diagnostics.push(new vscode.Diagnostic(
-			new vscode.Range(line1, column1, line2, column2),
-			msg,
-			vscode.DiagnosticSeverity.Error
-		));
+	updateAllDocs() {
+		for (let doc of vscode.workspace.textDocuments) {
+			this.updateDiagnostics(doc);
+		}
+	}
+
+	private updateDiagnostics(doc: vscode.TextDocument) {
+		if (doc.languageId === 'proze') {
+			this.diagnosticCollection.clear();
+			let diagnostics: vscode.Diagnostic[] = this.parseDocument(doc);
+			this.diagnosticMap.set(
+				doc.uri.toString(),
+				{uri: doc.uri, diagnostics: diagnostics}
+			);
+			this.applyDiagnostics();
+		}
 	}
 }
 
@@ -135,24 +134,6 @@ class ValidNameTokens implements vscode.DocumentSemanticTokensProvider {
 	constructor(
 		private legend: vscode.SemanticTokensLegend
 	) {}
-
-	async provideDocumentSemanticTokens(
-		document: vscode.TextDocument,
-		_token: vscode.CancellationToken
-	): Promise<vscode.SemanticTokens> {
-		const names = Config.getInstance().names(document.uri);
-		const tokens = this.parseText(document.getText(), names);
-		const builder = new vscode.SemanticTokensBuilder(this.legend);
-		for(let token of tokens) {
-			try {
-				builder.push(token.range, token.tokenType, token.tokenModifier);
-			}
-			catch (e) {
-				console.log(e);
-			}
-		}
-		return builder.build();
-	}
 
 	private parseText(text: string, names: Name[]): ParsedToken[] {
 		let tokens: ParsedToken[] = [];
@@ -186,5 +167,23 @@ class ValidNameTokens implements vscode.DocumentSemanticTokensProvider {
 			}
 		}
 		return tokens;
+	}
+
+	async provideDocumentSemanticTokens(
+		document: vscode.TextDocument,
+		_token: vscode.CancellationToken
+	): Promise<vscode.SemanticTokens> {
+		const names = Config.getInstance().names(document.uri);
+		const tokens = this.parseText(document.getText(), names);
+		const builder = new vscode.SemanticTokensBuilder(this.legend);
+		for(let token of tokens) {
+			try {
+				builder.push(token.range, token.tokenType, token.tokenModifier);
+			}
+			catch (e) {
+				console.log(e);
+			}
+		}
+		return builder.build();
 	}
 }
