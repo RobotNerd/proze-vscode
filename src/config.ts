@@ -1,6 +1,7 @@
 import * as Path from 'path';
 import * as YAML from 'yaml';
 import * as vscode from 'vscode';
+import { config } from 'process';
 
 // TODO merge this (or find abstraction) with the config parsing in the compiler module
 
@@ -45,28 +46,20 @@ export class Config {
     }
 
     private updateNameList() {
+        let addNames = (config: ConfigInterface, names: string[] | undefined, type: NameType) => {
+            if (names) {
+                for (let name of names) {
+                    config.nameList?.push({name, type});
+                }
+            }
+        };
+
         for (const config of this.configurations.values()) {
             config.nameList = [];
-            if (config.names?.character) {
-                for (let name of config.names?.character) {
-                    config.nameList.push({ name: name, type: NameType.character });
-                }
-            }
-            if (config.names?.place) {
-                for (let name of config.names?.place) {
-                    config.nameList.push({ name: name, type: NameType.place });
-                }
-            }
-            if (config.names?.thing) {
-                for (let name of config.names?.thing) {
-                    config.nameList.push({ name: name, type: NameType.thing });
-                }
-            }
-            if (config.names?.invalid) {
-                for (let name of config.names?.invalid) {
-                    config.nameList.push({ name: name, type: NameType.invalid });
-                }
-            }
+            addNames(config, config.names?.character, NameType.character);
+            addNames(config, config.names?.place, NameType.place);
+            addNames(config, config.names?.thing, NameType.thing);
+            addNames(config, config.names?.invalid, NameType.invalid);
         }
     }
 
