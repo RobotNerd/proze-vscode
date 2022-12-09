@@ -38,43 +38,16 @@ export class Config {
 
     private constructor() {}
 
+    get(uri: vscode.Uri): ConfigInterface | undefined {
+        const key = this.projectKey(uri);
+        return this.configurations.get(key);
+    }
+
     static getInstance(): Config {
         if (!this.instance) {
             Config.instance = new Config();
         }
         return Config.instance;
-    }
-
-    private updateNameList() {
-        let addNames = (config: ConfigInterface, names: string[] | undefined, type: NameType) => {
-            if (names) {
-                for (let name of names) {
-                    config.nameList?.push({name, type});
-                }
-            }
-        };
-
-        for (const config of this.configurations.values()) {
-            config.nameList = [];
-            addNames(config, config.names?.character, NameType.character);
-            addNames(config, config.names?.place, NameType.place);
-            addNames(config, config.names?.thing, NameType.thing);
-            addNames(config, config.names?.invalid, NameType.invalid);
-        }
-    }
-
-    private projectKey(uri: vscode.Uri): string {
-        const workspaceFolders = vscode.workspace.workspaceFolders;
-        let key: string = '';
-        if (workspaceFolders !== undefined) {
-            for (const folder of workspaceFolders) {
-                let root = folder.uri.path;
-                if (uri.path.startsWith(root) && key.length < root.length) {
-                    key = root;
-                }
-            }
-        }
-        return key;
     }
 
     private isFileInRootFolder(uri: vscode.Uri): boolean {
@@ -115,11 +88,6 @@ export class Config {
         this.updateNameList();
     }
 
-    get(uri: vscode.Uri): ConfigInterface | undefined {
-        const key = this.projectKey(uri);
-        return this.configurations.get(key);
-    }
-
     names(uri: vscode.Uri): Name[] {
         const config = this.get(uri);
         if (config?.nameList) {
@@ -134,5 +102,37 @@ export class Config {
 
     private parseYAML(content: string): ConfigInterface {
         return YAML.parse(content);
+    }
+
+    private projectKey(uri: vscode.Uri): string {
+        const workspaceFolders = vscode.workspace.workspaceFolders;
+        let key: string = '';
+        if (workspaceFolders !== undefined) {
+            for (const folder of workspaceFolders) {
+                let root = folder.uri.path;
+                if (uri.path.startsWith(root) && key.length < root.length) {
+                    key = root;
+                }
+            }
+        }
+        return key;
+    }
+
+    private updateNameList() {
+        let addNames = (config: ConfigInterface, names: string[] | undefined, type: NameType) => {
+            if (names) {
+                for (let name of names) {
+                    config.nameList?.push({name, type});
+                }
+            }
+        };
+
+        for (const config of this.configurations.values()) {
+            config.nameList = [];
+            addNames(config, config.names?.character, NameType.character);
+            addNames(config, config.names?.place, NameType.place);
+            addNames(config, config.names?.thing, NameType.thing);
+            addNames(config, config.names?.invalid, NameType.invalid);
+        }
     }
 }
