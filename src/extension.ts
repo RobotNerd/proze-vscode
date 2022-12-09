@@ -30,7 +30,7 @@ async function addConfigWatcher() {
 		await Config.getInstance().load();
 		nameErrors.updateAllDocs();
 	});
-	// watcher.onDidDelete(uri => Config.getInstance().remove(uri));
+	// TODO watcher.onDidDelete(uri => Config.getInstance().remove(uri));
 }
 
 export function deactivate() {

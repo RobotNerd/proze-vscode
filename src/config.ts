@@ -72,15 +72,16 @@ export class Config {
 
     private projectKey(uri: vscode.Uri): string {
         const workspaceFolders = vscode.workspace.workspaceFolders;
+        let key: string = '';
         if (workspaceFolders !== undefined) {
             for (const folder of workspaceFolders) {
                 let root = folder.uri.path;
-                if (uri.path.startsWith(root)) {
-                    return root;
+                if (uri.path.startsWith(root) && key.length < root.length) {
+                    key = root;
                 }
             }
         }
-        return '';
+        return key;
     }
 
     async load() {
@@ -89,16 +90,16 @@ export class Config {
             let ext = Path.parse(file.path).ext;
             const raw: Uint8Array = await vscode.workspace.fs.readFile(file);
             let content = raw.toString();
-                const key = this.projectKey(file);
-                switch(ext) {
-                    case '.json':
-                        this.configurations.set(key, this.parseJSON(content));
-                        break;
-                    case '.yaml':
-                    case '.yml':
-                        this.configurations.set(key, this.parseYAML(content));
-                        break;
-                }
+            const key = this.projectKey(file);
+            switch(ext) {
+                case '.json':
+                    this.configurations.set(key, this.parseJSON(content));
+                    break;
+                case '.yaml':
+                case '.yml':
+                    this.configurations.set(key, this.parseYAML(content));
+                    break;
+            }
         }
         this.updateNameList();
     }
