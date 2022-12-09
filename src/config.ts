@@ -68,10 +68,23 @@ export class Config {
     async load() {
         const files: vscode.Uri[] = await vscode.workspace.findFiles(Config.configPattern);
         for (const file of files) {
-            if (!this.isFileInRootFolder(file)){
-                continue;
+            if (this.isFileInRootFolder(file)){
+                await this.parseFile(file);
             }
-            let ext = Path.parse(file.path).ext;
+        }
+        this.updateNameList();
+    }
+
+    names(uri: vscode.Uri): Name[] {
+        const config = this.get(uri);
+        if (config?.nameList) {
+            return config.nameList;
+        }
+        return [];
+    }
+
+    async parseFile(file: vscode.Uri) {
+        let ext = Path.parse(file.path).ext;
             const raw: Uint8Array = await vscode.workspace.fs.readFile(file);
             let content = raw.toString();
             const key = this.projectKey(file);
@@ -84,16 +97,6 @@ export class Config {
                     this.configurations.set(key, this.parseYAML(content));
                     break;
             }
-        }
-        this.updateNameList();
-    }
-
-    names(uri: vscode.Uri): Name[] {
-        const config = this.get(uri);
-        if (config?.nameList) {
-            return config.nameList;
-        }
-        return [];
     }
 
     private parseJSON(content: string): ConfigInterface {
