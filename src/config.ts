@@ -82,7 +82,7 @@ export class Config {
     }
 
     async load() {
-        const files: vscode.Uri[] = await vscode.workspace.findFiles('**/config.*');
+        const files: vscode.Uri[] = await vscode.workspace.findFiles('**/config.*');  // TODO only want config in project root
         for (const file of files) {
             let ext = Path.parse(file.path).ext;
             const raw: Uint8Array = await vscode.workspace.fs.readFile(file);

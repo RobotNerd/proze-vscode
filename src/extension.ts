@@ -2,20 +2,37 @@ import { Config } from './config';
 import { NameHighlighter, NameErrors } from './names';
 import * as vscode from 'vscode';
 
+let watcher: vscode.FileSystemWatcher;
+
+const names = new NameHighlighter();
+const nameErrors = new NameErrors();
+
+
 export async function activate(context: vscode.ExtensionContext) {
 	let disposable = vscode.commands.registerCommand('proze.compile', () => {
 		vscode.window.showErrorMessage('Compile command not implemented');
 	});
 
 	await Config.getInstance().load();
-
 	context.subscriptions.push(disposable);
-
-	const names = new NameHighlighter();
 	names.activate(context);
-
-	const nameErrors = new NameErrors();
 	nameErrors.activate(context);
+	addConfigWatcher();
 }
 
-export function deactivate() {}
+async function addConfigWatcher() {
+	watcher = vscode.workspace.createFileSystemWatcher('**/config.*');  // TODO only want config in project root
+	watcher.onDidChange(async uri => {
+		await Config.getInstance().load();
+		nameErrors.updateAllDocs();
+	});
+	watcher.onDidCreate(async uri => {
+		await Config.getInstance().load();
+		nameErrors.updateAllDocs();
+	});
+	// watcher.onDidDelete(uri => Config.getInstance().remove(uri));
+}
+
+export function deactivate() {
+	watcher.dispose();
+}

@@ -51,19 +51,8 @@ export class NameErrors {
 		this.diagnosticCollection = vscode.languages.createDiagnosticCollection('proze');
 	}
 
-	// TODO create config file watcher for each workspace that has a config file
-	//		- watch for changes to existing config files
-	// 		- watch for the creation of a config file
-	//		- parse all proze documents if any name changes occurred
-	// let watcher = vscode.workspace.createFileSystemWatcher(path_to_config);
-	// watcher.onDidChange(e => {
-	// 	// See example: https://typescript.hotexamples.com/examples/vscode/FileSystemWatcher/-/typescript-filesystemwatcher-class-examples.html
-	// });
-
 	activate(context: vscode.ExtensionContext) {
-		for (let doc of vscode.workspace.textDocuments) {
-			this.updateDiagnostics(doc);
-		}
+		this.updateAllDocs();
 		if (vscode.window.activeTextEditor) {
 			this.updateDiagnostics(vscode.window.activeTextEditor.document);
 		}
@@ -79,6 +68,12 @@ export class NameErrors {
 				this.updateDiagnostics(doc);
 			})
 		);
+	}
+
+	updateAllDocs() {
+		for (let doc of vscode.workspace.textDocuments) {
+			this.updateDiagnostics(doc);
+		}
 	}
 
 	private updateDiagnostics(doc: vscode.TextDocument) {
