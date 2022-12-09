@@ -84,9 +84,27 @@ export class Config {
         return key;
     }
 
+    private isFileInRootFolder(uri: vscode.Uri): boolean {
+        let isInRoot = false;
+        const workspaceFolders = vscode.workspace.workspaceFolders;
+        if (workspaceFolders !== undefined) {
+            for (const folder of workspaceFolders) {
+                let fileFolder = uri.path.substring(0, uri.path.lastIndexOf("/"));
+                if (fileFolder === folder.uri.path) {
+                    isInRoot = true;
+                    break;
+                }
+            }
+        }
+        return isInRoot;
+    }
+
     async load() {
         const files: vscode.Uri[] = await vscode.workspace.findFiles(Config.configPattern);
         for (const file of files) {
+            if (!this.isFileInRootFolder(file)){
+                continue;
+            }
             let ext = Path.parse(file.path).ext;
             const raw: Uint8Array = await vscode.workspace.fs.readFile(file);
             let content = raw.toString();
