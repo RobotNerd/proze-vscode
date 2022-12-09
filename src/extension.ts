@@ -21,7 +21,7 @@ export async function activate(context: vscode.ExtensionContext) {
 }
 
 async function addConfigWatcher() {
-	watcher = vscode.workspace.createFileSystemWatcher('**/config.*');  // TODO only want config in project root
+	watcher = vscode.workspace.createFileSystemWatcher(Config.configPattern);
 	watcher.onDidChange(async uri => {
 		await Config.getInstance().load();
 		nameErrors.updateAllDocs();

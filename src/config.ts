@@ -30,6 +30,8 @@ export interface ConfigInterface {
 
 export class Config {
 
+    static configPattern = '**/config.*';
+
     private static instance: Config;
     private configurations: Map<string, ConfigInterface> = new Map<string, ConfigInterface>();
 
@@ -82,7 +84,7 @@ export class Config {
     }
 
     async load() {
-        const files: vscode.Uri[] = await vscode.workspace.findFiles('**/config.*');  // TODO only want config in project root
+        const files: vscode.Uri[] = await vscode.workspace.findFiles(Config.configPattern);
         for (const file of files) {
             let ext = Path.parse(file.path).ext;
             const raw: Uint8Array = await vscode.workspace.fs.readFile(file);
