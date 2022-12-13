@@ -3,6 +3,11 @@
   "displayName": "proze-vscode",
   "description": "A tool for writing stories with syntax highlighting.",
   "version": "0.0.1",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/RobotNerd/proze-vscode.git"
+  },
+  "icon": "images/icon.png",
   "engines": {
     "vscode": "^1.73.0"
   },

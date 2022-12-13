@@ -1,7 +1,6 @@
 import * as Path from 'path';
 import * as YAML from 'yaml';
 import * as vscode from 'vscode';
-import { config } from 'process';
 
 // TODO merge this (or find abstraction) with the config parsing in the compiler module
 
