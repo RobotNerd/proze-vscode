@@ -26,6 +26,12 @@
         "title": "Proze: Compile"
       }
     ],
+    "configurationDefaults": {
+      "[proze]": {
+        "editor.wordWrap": "wordWrapColumn",
+        "editor.wordWrapColumn": 80
+      }
+    },
     "languages": [
       {
         "id": "proze",
