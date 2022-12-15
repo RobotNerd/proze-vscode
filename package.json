@@ -1,12 +1,14 @@
 {
   "name": "proze",
-  "displayName": "proze-vscode",
-  "description": "A tool for writing stories with syntax highlighting.",
+  "displayName": "proze",
+  "description": "A tool for writing literature like you would write code.",
   "version": "0.0.1",
+  "license": "SEE LICENSE IN LICENSE",
   "repository": {
     "type": "git",
     "url": "https://github.com/RobotNerd/proze-vscode.git"
   },
+  "keywords": ["writing", "literature"],
   "icon": "images/icon.png",
   "engines": {
     "vscode": "^1.73.0"
@@ -26,6 +28,17 @@
         "title": "Proze: Compile"
       }
     ],
+    "configurationDefaults": {
+      "[proze]": {
+        "editor.quickSuggestions": {
+          "other": "off",
+          "comments": "off",
+          "strings": "off"
+        },
+        "editor.wordWrap": "wordWrapColumn",
+        "editor.wordWrapColumn": 80
+      }
+    },
     "languages": [
       {
         "id": "proze",
