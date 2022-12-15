@@ -28,6 +28,11 @@
     ],
     "configurationDefaults": {
       "[proze]": {
+        "editor.quickSuggestions": {
+          "other": "off",
+          "comments": "off",
+          "strings": "off"
+        },
         "editor.wordWrap": "wordWrapColumn",
         "editor.wordWrapColumn": 80
       }
